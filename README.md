@@ -1,84 +1,153 @@
 # Atom Control
 
-<img src="Resources/AtomControl-icon.png" width="128" alt="Ícone do Atom Control: fone prateado com onda sonora ciano">
+<img src="Resources/AtomControl-icon.png" width="128" alt="Atom Control icon">
 
-Controle de ANC do **EDIFIER Atom Max** na barra de menus do macOS. Swift, AppKit e CoreBluetooth, sem dependências externas. O menu é desenhado pelo próprio sistema: acompanha aparência clara/escura, tipografia, seleção, teclado e acessibilidade do macOS.
+**[Português (Brasil)](#português-brasil)** · **[English](#english)** · **[Español](#español)**
 
-## Abrir
+---
 
-Compile o projeto seguindo as instruções abaixo e abra **dist/Atom Control.app** pelo Finder. O app aparece como um ícone de fone na barra superior, sem janela principal e sem ícone no Dock. Os executáveis e caches de compilação não fazem parte do repositório.
+## Português (Brasil)
 
-1. Ligue o Atom Max e mantenha o Bluetooth do Mac ativado.
-2. Permita o acesso ao Bluetooth solicitado pelo Atom Control.
-3. Clique no ícone de fone e escolha **ANC forte**, **ANC fraco**, **Som ambiente** ou **Desativado**.
+Controle o cancelamento de ruído do fone **EDIFIER Atom Max** pela barra de menus do Mac, sem abrir o aplicativo do celular.
 
-O marcador de seleção representa o estado informado pelo firmware. Após uma alteração, o app faz uma consulta independente antes de marcar a opção. O app não altera o ANC ao iniciar ou ao encerrar. A conexão de áudio continua sendo gerenciada nos ajustes de Bluetooth/Som do Mac.
+- Quatro modos: **ANC forte**, **ANC fraco**, **Som ambiente** e **Desativado**.
+- Mostra bateria e o modo atual; o ícone na barra muda conforme o modo.
+- Leve: sem janela, sem ícone no Dock, sem internet e sem coleta de dados.
+- Em português, inglês ou espanhol, conforme o idioma do Mac.
 
-Use **Iniciar com o Mac** no menu para ativar ou desativar a abertura na sessão. O app usa `SMAppService.mainApp`, o mecanismo nativo do macOS 13 ou posterior. Se o sistema exigir autorização, a opção fica com um traço e aparece um atalho para **Itens de Início**. A seleção reflete o estado do sistema, inclusive mudanças feitas nos Ajustes. Mantenha o app em um local fixo, preferencialmente Aplicativos, antes de ativar.
+**Requisitos:** Mac com macOS 13 (Ventura) ou posterior.
 
-## Ícone e informações
+### Instalar com um agente de IA (recomendado)
 
-O símbolo na barra acompanha o modo confirmado: forma de onda cortada para ANC forte, traço de onda para ANC fraco, orelha para som ambiente e fone para controle desativado. Durante uma mudança ainda não confirmada, aparece uma reticência. Um fone esmaecido indica desconexão; uma interrogação indica um modo que o app não reconheceu. O texto ao passar o cursor e a descrição do VoiceOver informam o estado por extenso.
+Abra um agente de IA que trabalhe no seu Mac (Claude Code, Codex, Cursor, Gemini CLI etc.) e cole:
 
-O submenu **Sobre o fone** mostra modelo, estado da conexão de controle, modo, bateria, firmware e versão do app. A versão de firmware é consultada pelo comando de leitura C6 na primeira abertura do submenu em cada conexão. Se não houver resposta em cinco segundos ou o formato for desconhecido, aparece **Não informado** e o ANC continua disponível. O app não apresenta a versão histórica da investigação como se fosse uma leitura atual.
+> Baixe https://github.com/xandroalmeida/edifier-atom-max, siga as instruções do arquivo AGENTS.md para compilar e instalar o Atom Control no meu Mac e me explique o que fazer depois.
 
-O ícone do aplicativo foi criado com o gerador de imagens integrado e está em `Resources/AtomControl-icon.png`; a versão para Finder e outros elementos do sistema é `Resources/AtomControl.icns`. O build gera os dez tamanhos padrão do macOS com `sips` e `iconutil`. A origem e o prompt estão em [docs/icone.md](docs/icone.md). A barra de menus usa os símbolos nativos de estado, preservando legibilidade em tamanhos pequenos.
+O agente confere o Mac, compila e instala o app em **Aplicativos**. Se o macOS pedir para instalar as "ferramentas de linha de comando" ou pedir sua senha, aceite.
 
-## Compilar e testar
+### Instalar manualmente
 
-Requer macOS 13 ou posterior e Xcode Command Line Tools com Swift. O script compila para a arquitetura do Mac atual, otimiza o executável e assina o bundle localmente.
-
-```sh
-zsh scripts/test.sh
-zsh scripts/build.sh
-open "dist/Atom Control.app"
-```
-
-Não há instalação de serviços, downloads de dependências ou necessidade de privilégios de administrador. A compilação usa `.build/` como cache local. `dist/` contém o app pronto.
-
-## Gerar um instalador
+No **Terminal**:
 
 ```sh
-zsh scripts/package.sh
+xcode-select --install   # só na primeira vez; clique em Instalar e aguarde
+git clone https://github.com/xandroalmeida/edifier-atom-max.git
+cd edifier-atom-max
+zsh scripts/install.sh
 ```
 
-Gera `dist/Atom-Control-<versão>-<arquitetura>.pkg` e um checksum SHA-256. O pacote instala o app em **/Applications/Atom Control.app**, sem scripts de instalação ou ativação automática de itens de início. O build é específico para a arquitetura do Mac que o gerou; `arm64` atende aos Macs com chips Apple M1 ou posteriores. Requer macOS 13 ou posterior.
+### Usar
 
-Para instalar, encerre qualquer versão aberta do Atom Control, abra o `.pkg` no Finder e siga o instalador do macOS. Depois abra **Atom Control** em Aplicativos e permita Bluetooth se solicitado. A opção **Iniciar com o Mac** deve ser ativada a partir dessa cópia instalada. O instalador pode solicitar autenticação de administrador para gravar em Aplicativos.
+1. Ligue o Atom Max e deixe o Bluetooth do Mac ativado.
+2. Clique no ícone de fone na barra de menus (canto superior direito).
+3. Quando o macOS perguntar, permita o acesso ao Bluetooth.
+4. Escolha o modo de ruído. Para abrir o app automaticamente, marque **Iniciar com o Mac**.
 
-Este é um pacote para instalação local, sem assinatura Developer ID nem notarização da Apple; o app tem assinatura ad hoc. A geração extrai o payload final, verifica o caminho de instalação, a assinatura do app e a igualdade do executável com o build original.
+O app só controla o cancelamento de ruído; o áudio continua sendo escolhido nos ajustes de Som/Bluetooth do Mac.
 
-## Comportamento e consumo
+### Problemas comuns
 
-- Um único processo nativo, sem WebView, Electron ou SwiftUI.
-- Sem rede, telemetria ou consultas periódicas ao fone.
-- Varredura BLE limitada a 12 segundos; conexão/descoberta limitada a 15 segundos.
-- Atualização ao abrir o menu, limitada a uma consulta a cada 5 segundos, e por notificações do fone quando disponíveis.
-- Comandos serializados, com pelo menos 350 ms entre envios e tempo limite de resposta de 5 segundos.
-- Conexão de controle mantida enquanto disponível; liberada no repouso e retomada ao despertar.
-- Reconexão automática após falhas, com intervalos de 5, 15, 30, 60, 120 e depois 300 segundos entre as tentativas. Só há uma tentativa agendada; não há varredura contínua. O menu informa o horário da próxima tentativa.
-- As tentativas param com Bluetooth desligado, permissão negada, repouso ou encerramento do app. Acordar o Mac, reativar o Bluetooth ou conectar manualmente reinicia o intervalo. Uma conexão completa bem-sucedida também reinicia o intervalo.
-- Só o identificador BLE de um Atom Max validado é salvo nas preferências locais para acelerar a próxima conexão.
-- Nenhum serviço ou item de início é instalado automaticamente.
+- **Fone não encontrado:** feche o app Edifier ConneX no celular e no Mac, aproxime o fone e clique em **Conectar ao fone**. Se persistir, desligue e ligue o fone.
+- **Permissão negada:** Ajustes do Sistema → Privacidade e Segurança → Bluetooth → ative Atom Control.
+- **Cabo USB-C:** o Atom Max desliga o Bluetooth quando usado com cabo; o app precisa do Bluetooth.
+- **Desinstalar:** `zsh scripts/install.sh --uninstall` na pasta do projeto.
 
-## Solução de problemas
+---
 
-**Permissão negada:** abra **Ajustes do Sistema → Privacidade e Segurança → Bluetooth** e permita Atom Control. O menu oferece um atalho quando a permissão está negada.
+## English
 
-**Fone não encontrado ou sem resposta:** feche o Edifier ConneX no Mac/celular para liberar uma possível conexão de controle, aproxime o fone e use **Conectar ao fone** novamente. Se necessário, desligue e religue o fone. Uma tentativa com identificador antigo que falhar permite nova descoberta na próxima tentativa.
+Control the noise cancellation of your **EDIFIER Atom Max** headphones from the Mac menu bar, without the phone app.
 
-**USB:** o manual informa que o Atom Max desativa o Bluetooth no uso com cabo USB-C. Este aplicativo usa BLE e precisa da função Bluetooth do fone disponível.
+- Four modes: **Strong ANC**, **Light ANC**, **Ambient sound** and **Off**.
+- Shows battery and current mode; the menu-bar icon changes with the mode.
+- Lightweight: no window, no Dock icon, no internet, no data collection.
+- In English, Portuguese or Spanish, following your Mac's language.
 
-**Outro modo ativo:** se o fone informar um código diferente dos quatro modos implementados, nenhuma opção é marcada. O app sempre compara o estado retornado pelo fone com o modo escolhido e informa se a mudança não foi confirmada.
+**Requirements:** a Mac running macOS 13 (Ventura) or later.
 
-Os eventos de conexão e mensagens de estado aparecem no Console do macOS, no subsistema `br.com.local.AtomControl`.
+### Install with an AI agent (recommended)
 
-## Protocolo e validação
+Open an AI agent that works on your Mac (Claude Code, Codex, Cursor, Gemini CLI, etc.) and paste:
 
-A implementação usa os frames e UUIDs registrados em [investigacao-edifier-atom-max.md](investigacao-edifier-atom-max.md). Antes de qualquer alteração, confirma o nome `EDIFIER Atom Max`. Valida checksum, comprimento, fragmentação e comando de cada resposta. Os testes usam as capturas reais documentadas nessa investigação.
+> Download https://github.com/xandroalmeida/edifier-atom-max, follow the instructions in AGENTS.md to build and install Atom Control on my Mac, and tell me what to do next.
 
-Os testes automatizados verificam a codificação dos comandos, a leitura de respostas fragmentadas/concatenadas, a rejeição de checksum incorreto, a recuperação após dados inválidos e o tratamento de estados desconhecidos. Eles não substituem a validação da conexão e da interface no Mac com o fone.
+The agent checks your Mac, builds the app and installs it in **Applications**. If macOS asks to install the "command line developer tools" or asks for your password, accept.
 
-Também verificam o limite e reinício dos intervalos de reconexão, a suspensão das tentativas, ícones distintos e ausência de modos antigos após desconexão, além dos formatos de firmware. O comando opcional C6 e a apresentação de três bytes como versão hexadecimal seguem [mEDIFIER](https://github.com/wh201906/mEDIFIER/blob/master/Qt/devices/basedevice.cpp); sua resposta neste Atom Max ainda depende de validação física. O cadastro real de início de sessão depende da autorização do macOS e de uma assinatura aceita pelo sistema; falhas são exibidas, sem marcar a opção como ativada.
+### Install manually
 
-O firmware do Atom Max não tem uma API pública documentada. As capturas locais do firmware 2.4.0 confirmam ANC ligado (`0x01`), desligado (`0x05`), consulta de nome e bateria. Os modos adicionais seguem a [documentação do protocolo BES/ANC16 do HyperEars](https://github.com/silverpoetry/HyperEars/blob/main/docs/edifier-bes-protocol.md): forte `0x01`, confortável/fraco `0x02`, ambiente `0x04`, desligado `0x05`. A correspondência de fraco e ambiente é uma inferência da mesma família de protocolo; ainda precisa de validação física neste Atom Max. O app preserva o transporte em texto claro e o grupo `0x10` confirmados localmente, e exige consulta independente após toda seleção. Não envia comandos de atualização, redefinição ou mudança de pareamento.
+In **Terminal**:
+
+```sh
+xcode-select --install   # first time only; click Install and wait
+git clone https://github.com/xandroalmeida/edifier-atom-max.git
+cd edifier-atom-max
+zsh scripts/install.sh
+```
+
+### Use
+
+1. Turn on the Atom Max and keep Bluetooth on your Mac enabled.
+2. Click the headphones icon in the menu bar (top right).
+3. When macOS asks, allow Bluetooth access.
+4. Pick a noise mode. To start the app automatically, check **Launch at login**.
+
+The app only controls noise cancellation; audio output is still chosen in the Mac's Sound/Bluetooth settings.
+
+### Troubleshooting
+
+- **Headphones not found:** close the Edifier ConneX app on your phone and Mac, bring the headphones closer and click **Connect to headphones**. If it persists, turn the headphones off and on.
+- **Permission denied:** System Settings → Privacy & Security → Bluetooth → enable Atom Control.
+- **USB-C cable:** the Atom Max turns Bluetooth off when used with a cable; the app needs Bluetooth.
+- **Uninstall:** run `zsh scripts/install.sh --uninstall` in the project folder.
+
+---
+
+## Español
+
+Controla la cancelación de ruido de tus auriculares **EDIFIER Atom Max** desde la barra de menús del Mac, sin la app del móvil.
+
+- Cuatro modos: **ANC fuerte**, **ANC suave**, **Sonido ambiente** y **Desactivado**.
+- Muestra la batería y el modo actual; el icono de la barra cambia según el modo.
+- Ligera: sin ventana, sin icono en el Dock, sin internet y sin recopilar datos.
+- En español, portugués o inglés, según el idioma del Mac.
+
+**Requisitos:** un Mac con macOS 13 (Ventura) o posterior.
+
+### Instalar con un agente de IA (recomendado)
+
+Abre un agente de IA que trabaje en tu Mac (Claude Code, Codex, Cursor, Gemini CLI, etc.) y pega:
+
+> Descarga https://github.com/xandroalmeida/edifier-atom-max, sigue las instrucciones de AGENTS.md para compilar e instalar Atom Control en mi Mac y explícame qué hacer después.
+
+El agente revisa tu Mac, compila la app y la instala en **Aplicaciones**. Si macOS pide instalar las "herramientas de línea de comandos" o pide tu contraseña, acepta.
+
+### Instalar manualmente
+
+En **Terminal**:
+
+```sh
+xcode-select --install   # solo la primera vez; haz clic en Instalar y espera
+git clone https://github.com/xandroalmeida/edifier-atom-max.git
+cd edifier-atom-max
+zsh scripts/install.sh
+```
+
+### Uso
+
+1. Enciende los Atom Max y mantén activado el Bluetooth del Mac.
+2. Haz clic en el icono de auriculares de la barra de menús (arriba a la derecha).
+3. Cuando macOS lo pida, permite el acceso a Bluetooth.
+4. Elige el modo de ruido. Para abrir la app automáticamente, marca **Abrir al iniciar sesión**.
+
+La app solo controla la cancelación de ruido; la salida de audio se sigue eligiendo en los ajustes de Sonido/Bluetooth del Mac.
+
+### Problemas frecuentes
+
+- **Auriculares no encontrados:** cierra la app Edifier ConneX en el móvil y en el Mac, acerca los auriculares y haz clic en **Conectar a los auriculares**. Si persiste, apágalos y vuelve a encenderlos.
+- **Permiso denegado:** Ajustes del Sistema → Privacidad y seguridad → Bluetooth → activa Atom Control.
+- **Cable USB-C:** los Atom Max apagan el Bluetooth cuando se usan con cable; la app necesita Bluetooth.
+- **Desinstalar:** ejecuta `zsh scripts/install.sh --uninstall` en la carpeta del proyecto.
+
+---
+
+Documentação técnica / Technical documentation / Documentación técnica: [docs/documentacao-tecnica.md](docs/documentacao-tecnica.md)

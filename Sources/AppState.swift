@@ -27,10 +27,10 @@ struct StatusPresentation {
             description = mode.title
         } else if busy {
             symbol = "ellipsis.circle"
-            description = "Conectando ou atualizando o fone"
+            description = L("Connecting to or refreshing the headphones")
         } else {
             symbol = ready ? "questionmark.circle" : "headphones"
-            description = ready ? "Modo não confirmado" : "Fone desconectado"
+            description = ready ? L("Mode not confirmed") : L("Headphones disconnected")
         }
     }
 }

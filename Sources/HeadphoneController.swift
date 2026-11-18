@@ -26,7 +26,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
     private var requestTimeout: (() -> Void)?
 
     var onChange: (() -> Void)?
-    private(set) var message = "Preparando Bluetooth…"
+    private(set) var message = L("Preparing Bluetooth…")
     private(set) var mode: ANCMode?
     private(set) var battery: Int?
     private(set) var ready = false
@@ -65,7 +65,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         if manually { backoff.reset() }
         reset()
         busy = true
-        update("Procurando Atom Max…")
+        update(L("Searching for Atom Max…"))
         // A previously verified device is preferred; never persist a machine-specific UUID in source.
         if let saved = UserDefaults.standard.string(forKey: "headphoneID"),
            let id = UUID(uuidString: saved),
@@ -79,7 +79,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         }
         // Some Edifier firmware advertises its name without the service UUID.
         central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
-        armTimeout(12, message: "Fone não encontrado. Ligue-o e tente conectar.")
+        armTimeout(12, message: L("Headphones not found. Turn them on and try connecting."))
     }
 
     private func scheduleReconnect() {
@@ -94,7 +94,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
             self.connect(manually: false)
         }
         reconnect = work
-        logger.info("Nova tentativa em \(delay) segundos")
+        logger.info("Next attempt in \(delay) seconds")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
         onChange?()
     }
@@ -130,8 +130,8 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         central.stopScan()
         peripheral = device
         device.delegate = self
-        update("Conectando ao fone…")
-        armTimeout(15, message: "Não foi possível conectar. Feche o ConneX e tente novamente.")
+        update(L("Connecting to headphones…"))
+        armTimeout(15, message: L("Couldn’t connect. Close ConneX and try again."))
         central.connect(device)
     }
 
@@ -147,15 +147,15 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         busy = true
         // State is unknown until the separate readback, even if the write is acknowledged.
         mode = nil
-        update("Selecionando \(target.title.lowercased())…")
+        update(L("Selecting %@…", target.title))
         request(0xC1, payload: [0x10, target.rawValue]) { [weak self] _ in
             self?.queryState {
                 guard let self else { return }
                 self.busy = false
                 if self.mode == target {
-                    self.update("Conectado")
+                    self.update(L("Connected"))
                 } else {
-                    self.update("O fone não confirmou a alteração. Tente novamente.")
+                    self.update(L("The headphones didn’t confirm the change. Try again."))
                 }
             }
         }
@@ -165,7 +165,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         request(0xCC) { [weak self] frame in
             guard let self else { return }
             guard frame.payload.count >= 2, frame.payload[0] == 0x10 else {
-                self.fail("Resposta de ANC não reconhecida.")
+                self.fail(L("Unrecognized ANC response."))
                 return
             }
             self.mode = ANCMode.decode(frame.payload)
@@ -181,7 +181,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
             self.battery = frame.payload.first.flatMap { $0 <= 100 ? Int($0) : nil }
             self.busy = false
             self.backoff.reset()
-            self.update("Conectado")
+            self.update(L("Connected"))
         }
     }
 
@@ -204,7 +204,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
                     self.requestTimeout = nil
                     optionalTimeout()
                 } else {
-                    self.fail("O fone não respondeu. Tentando reconectar…")
+                    self.fail(L("The headphones didn’t respond. Trying to reconnect…"))
                 }
             }
             self.deadline = timeout
@@ -258,7 +258,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
     @objc private func willSleep() {
         sleeping = true
         reset()
-        update("Mac em repouso")
+        update(L("Mac is asleep"))
     }
 
     @objc private func didWake() {
@@ -272,10 +272,10 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
         case .poweredOn:
             backoff.reset()
             connect(manually: false)
-        case .poweredOff: fail("Ative o Bluetooth do Mac.")
-        case .unauthorized: fail("Permita Bluetooth nos Ajustes do Sistema.")
-        case .unsupported: fail("Bluetooth indisponível neste Mac.")
-        case .resetting: fail("Bluetooth reiniciando…")
+        case .poweredOff: fail(L("Turn on Bluetooth on your Mac."))
+        case .unauthorized: fail(L("Allow Bluetooth in System Settings."))
+        case .unsupported: fail(L("Bluetooth is unavailable on this Mac."))
+        case .resetting: fail(L("Bluetooth is restarting…"))
         default: break
         }
     }
@@ -297,18 +297,18 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
     func centralManager(_ central: CBCentralManager, didFailToConnect device: CBPeripheral, error: Error?) {
         guard device === peripheral else { return }
         UserDefaults.standard.removeObject(forKey: "headphoneID")
-        fail("Falha na conexão. Tente conectar novamente.")
+        fail(L("Connection failed. Try connecting again."))
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral device: CBPeripheral, error: Error?) {
         guard device === peripheral else { return }
-        fail("Fone desconectado")
+        fail(L("Headphones disconnected"))
     }
 
     func peripheral(_ device: CBPeripheral, didDiscoverServices error: Error?) {
         guard device === peripheral else { return }
         guard error == nil, let service = device.services?.first(where: { $0.uuid == Self.service }) else {
-            fail("Serviço de controle indisponível.")
+            fail(L("Control service unavailable."))
             return
         }
         device.discoverCharacteristics([Self.notify, Self.write], for: service)
@@ -320,7 +320,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
               let notify = service.characteristics?.first(where: { $0.uuid == Self.notify }),
               let write = service.characteristics?.first(where: { $0.uuid == Self.write }),
               notify.properties.contains(.notify), write.properties.contains(.write) else {
-            fail("Controles Bluetooth incompatíveis.")
+            fail(L("Incompatible Bluetooth controls."))
             return
         }
         writer = write
@@ -330,7 +330,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
     func peripheral(_ device: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
         guard device === peripheral, characteristic.uuid == Self.notify else { return }
         guard error == nil, characteristic.isNotifying else {
-            fail("Não foi possível receber o estado do fone.")
+            fail(L("Couldn’t receive the headphones’ status."))
             return
         }
         deadline?.cancel()
@@ -338,7 +338,7 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
             guard let self else { return }
             let name = String(bytes: frame.payload, encoding: .utf8)?.trimmingCharacters(in: .controlCharacters)
             guard name == "EDIFIER Atom Max" else {
-                self.fail("Dispositivo encontrado não é um Atom Max.")
+                self.fail(L("The device found is not an Atom Max."))
                 return
             }
             self.verified = true
@@ -353,13 +353,13 @@ final class HeadphoneController: NSObject, CBCentralManagerDelegate, CBPeriphera
 
     func peripheral(_ device: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         guard device === peripheral else { return }
-        if error != nil { fail("Falha ao enviar comando. Reconecte para consultar o estado.") }
+        if error != nil { fail(L("Failed to send the command. Reconnect to check the status.")) }
     }
 
     func peripheral(_ device: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard device === peripheral, characteristic.uuid == Self.notify else { return }
         guard error == nil, let data = characteristic.value else {
-            fail("Falha ao ler resposta Bluetooth.")
+            fail(L("Failed to read the Bluetooth response."))
             return
         }
         for frame in parser.append(data) {

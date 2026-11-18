@@ -5,8 +5,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let controller = HeadphoneController()
     private var statusItem: NSStatusItem!
     private let menu = NSMenu()
-    private let stateItem = NSMenuItem(title: "Preparando Bluetooth…", action: nil, keyEquivalent: "")
-    private let batteryItem = NSMenuItem(title: "Bateria —", action: nil, keyEquivalent: "")
+    private let stateItem = NSMenuItem(title: L("Preparing Bluetooth…"), action: nil, keyEquivalent: "")
+    private let batteryItem = NSMenuItem(title: L("Battery —"), action: nil, keyEquivalent: "")
     private var modeItems: [ANCMode: NSMenuItem] = [:]
     private var connectItem: NSMenuItem!
     private var refreshItem: NSMenuItem!
@@ -14,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var loginItem: NSMenuItem!
     private var loginApprovalItem: NSMenuItem!
     private let retryItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-    private let aboutMenu = NSMenu(title: "Sobre o fone")
+    private let aboutMenu = NSMenu(title: L("About the headphones"))
     private let modelInfo = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let firmwareInfo = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let connectionInfo = NSMenuItem(title: "", action: nil, keyEquivalent: "")
@@ -28,7 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "headphones", accessibilityDescription: "Atom Control")
         statusItem.button?.image?.isTemplate = true
-        statusItem.button?.setAccessibilityLabel("Atom Control — controle de cancelamento de ruído")
+        statusItem.button?.setAccessibilityLabel(L("Atom Control — noise cancellation control"))
         menu.autoenablesItems = false
         menu.delegate = self
         let title = NSMenuItem(title: "EDIFIER Atom Max", action: nil, keyEquivalent: "")
@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(stateItem)
         menu.addItem(batteryItem)
         menu.addItem(.separator())
-        let section = NSMenuItem(title: "Controle de ruído", action: nil, keyEquivalent: "")
+        let section = NSMenuItem(title: L("Noise control"), action: nil, keyEquivalent: "")
         section.isEnabled = false
         menu.addItem(section)
         for mode in ANCMode.allCases {
@@ -48,15 +48,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             modeItems[mode] = control
         }
         menu.addItem(.separator())
-        connectItem = item("Conectar ao fone", action: #selector(connect), symbol: "antenna.radiowaves.left.and.right")
-        refreshItem = item("Atualizar estado", action: #selector(refresh), symbol: "arrow.clockwise")
-        permissionItem = item("Permitir Bluetooth…", action: #selector(openBluetoothPrivacy), symbol: "lock.shield")
+        connectItem = item(L("Connect to headphones"), action: #selector(connect), symbol: "antenna.radiowaves.left.and.right")
+        refreshItem = item(L("Refresh status"), action: #selector(refresh), symbol: "arrow.clockwise")
+        permissionItem = item(L("Allow Bluetooth…"), action: #selector(openBluetoothPrivacy), symbol: "lock.shield")
         retryItem.isEnabled = false
         menu.addItem(retryItem)
         menu.addItem(.separator())
-        loginItem = item("Iniciar com o Mac", action: #selector(toggleLogin), symbol: "power")
-        loginApprovalItem = item("Autorizar início nos Ajustes…", action: #selector(openLoginSettings), symbol: "gearshape")
-        let aboutItem = item("Sobre o fone", action: nil, symbol: "info.circle")
+        loginItem = item(L("Launch at login"), action: #selector(toggleLogin), symbol: "power")
+        loginApprovalItem = item(L("Approve in System Settings…"), action: #selector(openLoginSettings), symbol: "gearshape")
+        let aboutItem = item(L("About the headphones"), action: nil, symbol: "info.circle")
         aboutItem.submenu = aboutMenu
         aboutMenu.autoenablesItems = false
         aboutMenu.delegate = self
@@ -70,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         appInfo.isEnabled = false
         aboutMenu.addItem(appInfo)
         menu.addItem(.separator())
-        let quit = item("Encerrar Atom Control", action: #selector(quit), symbol: nil)
+        let quit = item(L("Quit Atom Control"), action: #selector(quit), symbol: nil)
         quit.keyEquivalent = "q"
         statusItem.menu = menu
         controller.onChange = { [weak self] in
@@ -92,7 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func render() {
         stateItem.title = controller.message
-        batteryItem.title = controller.battery.map { "Bateria: \($0)%" } ?? "Bateria —"
+        batteryItem.title = controller.battery.map { L("Battery: %d%%", $0) } ?? L("Battery —")
         let enabled = controller.ready && !controller.busy
         for (mode, control) in modeItems {
             control.isEnabled = enabled
@@ -103,7 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         refreshItem.isHidden = !controller.ready
         refreshItem.isEnabled = enabled
         permissionItem.isHidden = controller.authorized
-        let modeText = controller.mode?.title ?? "Modo não confirmado"
+        let modeText = controller.mode?.title ?? L("Mode not confirmed")
         statusItem.button?.toolTip = "Atom Control · \(controller.message) · \(modeText)"
         let presentation = StatusPresentation(ready: controller.ready, busy: controller.busy, mode: controller.mode)
         if presentation.symbol != lastStatusSymbol {
@@ -115,20 +115,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem.button?.setAccessibilityLabel("Atom Control — \(presentation.description)")
         retryItem.isHidden = controller.reconnectAt == nil
         if let next = controller.reconnectAt {
-            retryItem.title = "Reconexão às \(next.formatted(date: .omitted, time: .standard))"
+            retryItem.title = L("Reconnecting at %@", next.formatted(date: .omitted, time: .standard))
         }
-        modelInfo.title = "Modelo: \(controller.deviceName ?? "Atom Max · não conectado")"
-        firmwareInfo.title = "Firmware: \(controller.firmwareLoading ? "Consultando…" : controller.firmware ?? "Não informado")"
-        connectionInfo.title = controller.ready ? "Controle conectado por Bluetooth LE" : controller.message
-        noiseInfo.title = "Modo: \(controller.mode?.title ?? "Não confirmado")"
-        batteryInfo.title = "Bateria: \(controller.battery.map { "\($0)%" } ?? "Não informada")"
+        modelInfo.title = L("Model: %@", controller.deviceName ?? L("Atom Max · not connected"))
+        firmwareInfo.title = L("Firmware: %@", controller.firmwareLoading ? L("Checking…") : controller.firmware ?? L("Not reported"))
+        connectionInfo.title = controller.ready ? L("Control connected via Bluetooth LE") : controller.message
+        noiseInfo.title = L("Mode: %@", controller.mode?.title ?? L("Not confirmed"))
+        batteryInfo.title = controller.battery.map { L("Battery: %d%%", $0) } ?? L("Battery: not reported")
         renderLoginState()
     }
 
     private func renderLoginState() {
         let state = SMAppService.mainApp.status
         loginItem.state = state == .enabled ? .on : state == .requiresApproval ? .mixed : .off
-        loginItem.title = state == .requiresApproval ? "Iniciar com o Mac · aguardando autorização" : "Iniciar com o Mac"
+        loginItem.title = state == .requiresApproval ? L("Launch at login · awaiting approval") : L("Launch at login")
         loginApprovalItem.isHidden = state != .requiresApproval
     }
 
@@ -144,9 +144,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             renderLoginState()
             NSApp.activate(ignoringOtherApps: true)
             let alert = NSAlert()
-            alert.messageText = "Não foi possível alterar o início com o Mac"
-            alert.informativeText = "Mantenha o app em um local fixo, como Aplicativos, e tente novamente.\n\n\(error.localizedDescription)"
-            alert.addButton(withTitle: "OK")
+            alert.messageText = L("Couldn’t change launch at login")
+            alert.informativeText = L("Keep the app in a fixed location, such as Applications, and try again.") + "\n\n" + error.localizedDescription
+            alert.addButton(withTitle: L("OK"))
             alert.runModal()
         }
     }

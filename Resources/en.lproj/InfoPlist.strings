@@ -1,0 +1,2 @@
+NSBluetoothAlwaysUsageDescription = "Atom Control uses Bluetooth to read and change noise cancellation on your EDIFIER Atom Max.";
+NSBluetoothPeripheralUsageDescription = "Control noise cancellation on your EDIFIER Atom Max.";

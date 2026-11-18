@@ -8,10 +8,10 @@ enum ANCMode: UInt8, CaseIterable {
 
     var title: String {
         switch self {
-        case .strong: return "ANC forte"
-        case .weak: return "ANC fraco"
-        case .ambient: return "Som ambiente"
-        case .off: return "Desativado"
+        case .strong: return L("Strong ANC")
+        case .weak: return L("Light ANC")
+        case .ambient: return L("Ambient sound")
+        case .off: return L("Off")
         }
     }
 
