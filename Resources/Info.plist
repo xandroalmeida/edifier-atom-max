@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+    <key>CFBundleExecutable</key><string>AtomControl</string>
+    <key>CFBundleIdentifier</key><string>br.com.local.AtomControl</string>
+    <key>CFBundleName</key><string>Atom Control</string>
+    <key>CFBundleDisplayName</key><string>Atom Control</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleIconFile</key><string>AtomControl</string>
+    <key>CFBundleShortVersionString</key><string>0.3.1</string>
+    <key>CFBundleVersion</key><string>4</string>
+    <key>LSMinimumSystemVersion</key><string>13.0</string>
+    <key>LSUIElement</key><true/>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>NSBluetoothAlwaysUsageDescription</key><string>O Atom Control usa Bluetooth para consultar e alterar o cancelamento de ruído do seu EDIFIER Atom Max.</string>
+    <key>NSBluetoothPeripheralUsageDescription</key><string>Controlar o cancelamento de ruído do seu EDIFIER Atom Max.</string>
+</dict></plist>
