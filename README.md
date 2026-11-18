@@ -36,6 +36,18 @@ open "dist/Atom Control.app"
 
 Não há instalação de serviços, downloads de dependências ou necessidade de privilégios de administrador. A compilação usa `.build/` como cache local. `dist/` contém o app pronto.
 
+## Gerar um instalador
+
+```sh
+zsh scripts/package.sh
+```
+
+Gera `dist/Atom-Control-<versão>-<arquitetura>.pkg` e um checksum SHA-256. O pacote instala o app em **/Applications/Atom Control.app**, sem scripts de instalação ou ativação automática de itens de início. O build é específico para a arquitetura do Mac que o gerou; `arm64` atende aos Macs com chips Apple M1 ou posteriores. Requer macOS 13 ou posterior.
+
+Para instalar, encerre qualquer versão aberta do Atom Control, abra o `.pkg` no Finder e siga o instalador do macOS. Depois abra **Atom Control** em Aplicativos e permita Bluetooth se solicitado. A opção **Iniciar com o Mac** deve ser ativada a partir dessa cópia instalada. O instalador pode solicitar autenticação de administrador para gravar em Aplicativos.
+
+Este é um pacote para instalação local, sem assinatura Developer ID nem notarização da Apple; o app tem assinatura ad hoc. A geração extrai o payload final, verifica o caminho de instalação, a assinatura do app e a igualdade do executável com o build original.
+
 ## Comportamento e consumo
 
 - Um único processo nativo, sem WebView, Electron ou SwiftUI.
